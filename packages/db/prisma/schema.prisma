@@ -1,0 +1,75 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  name      String
+  Tours     Tour[]
+  Sessions  Session[]
+}
+
+model Tour {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  User      User     @relation(fields: [userId], references: [id])
+  userId    String
+  steps_id     String[]
+  Steps     Step[] 
+  Sessions  Session[] 
+  Metrics   Metrics[]
+}
+
+model Step {
+  id        String   @id @default(uuid())
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Tour      Tour     @relation(fields: [tourId], references: [id])
+  tourId    String
+  imageUrl  String @default("")
+  videoUrl  String @default("")
+  caption String
+}
+
+
+
+model Session {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  Tour      Tour     @relation(fields: [tourId], references: [id])
+  tourId    String
+  createdBy User     @relation(fields: [createdById], references: [id])
+  createdById String
+  Participants Json @default("[]")
+}
+
+model Metrics {
+  id        String   @id @default(uuid())
+  Tour      Tour     @relation(fields: [tourId], references: [id])
+  tourId    String
+  updatedAt DateTime @updatedAt
+  Views     Int
+  CTA_Clicks Int
+  Play_Time Int
+}
